@@ -1,65 +1,86 @@
 "use client";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 
-const mockMessages = [
-  { sender: "buyer", message: "I paid but not received.", time: "2025-05-01" },
+const mockTickets = [
   {
-    sender: "admin",
-    message: "We'll check and reply soon.",
-    time: "2025-05-02",
+    id: 1,
+    title: "Payment not received",
+    created: "2025-05-01",
+    status: "open",
+    lastReply: "admin",
+    lastUpdated: "2025-05-02",
   },
 ];
 
-export default function TicketDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function TicketsPage() {
   const auth = useAuth();
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState(mockMessages);
+  const roles = auth?.user?.roles || [];
+  const router = useRouter();
 
-  if (!auth?.user) return <div>Unauthorized</div>;
-
-  const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!auth.user) return;
-    setMessages([
-      ...messages,
-      { sender: auth.user.username, message: input, time: "Now" },
-    ]);
-    setInput("");
-  };
+  let tickets = mockTickets;
+  if (!roles.includes("admin")) {
+    // TODO: Replace with user-specific filter when available
+    tickets = tickets.slice();
+  }
 
   return (
     <div>
-      <h1 className="text-2xl mb-4 font-bold text-[#38E54D]">
-        Ticket #{params.id}
-      </h1>
-      <div className="bg-[#18141c] rounded-lg p-4 mb-4">
-        {messages.map((m, i) => (
-          <div key={i} className="mb-3">
-            <span className="text-sm text-[#38E54D] font-bold">{m.sender}</span>
-            <span className="ml-2 text-xs text-[#888]">{m.time}</span>
-            <div className="ml-4 text-white">{m.message}</div>
-          </div>
-        ))}
-      </div>
-      <form onSubmit={handleSend} className="flex gap-2">
-        <input
-          className="flex-1 rounded p-2 bg-[#111] text-white border border-[#333]"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Reply message..."
-        />
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-[#38E54D]">Tickets</h1>
         <button
-          type="submit"
           className="bg-[#38E54D] text-[#18141c] px-4 py-2 rounded font-bold"
+          onClick={() => router.push("/dashboard/tickets/new")}
         >
-          Send
+          + New Ticket
         </button>
-      </form>
+      </div>
+      <table className="min-w-full bg-[#18141c] rounded-lg text-white">
+        <thead>
+          <tr className="border-b border-[#333]">
+            <th className="py-2 px-4 text-left">Title</th>
+            <th className="py-2 px-4">Created</th>
+            <th className="py-2 px-4">Status</th>
+            <th className="py-2 px-4">Last Reply</th>
+            <th className="py-2 px-4">Last Updated</th>
+            <th className="py-2 px-4">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tickets.map((t) => (
+            <tr key={t.id} className="border-b border-[#222] hover:bg-[#222]">
+              <td className="py-2 px-4">{t.title}</td>
+              <td className="py-2 px-4">{t.created}</td>
+              <td className="py-2 px-4">
+                <span
+                  className={
+                    t.status === "open" ? "text-green-400" : "text-yellow-400"
+                  }
+                >
+                  {t.status}
+                </span>
+              </td>
+              <td className="py-2 px-4">{t.lastReply}</td>
+              <td className="py-2 px-4">{t.lastUpdated}</td>
+              <td className="py-2 px-4">
+                <button
+                  className="bg-[#222] border border-[#38E54D] text-[#38E54D] px-2 py-1 rounded"
+                  onClick={() => router.push(`/dashboard/tickets/${t.id}`)}
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          ))}
+          {tickets.length === 0 && (
+            <tr>
+              <td colSpan={6} className="text-center py-10 text-[#777]">
+                No tickets found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
