@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fontdiner+Swanky&family=Kablammo&family=Kings&family=Mea+Culpa&family=UnifrakturMaguntia&display=swap");
 @import "tailwindcss";
 
 /* ─────────────────────────────────  DESIGN TOKENS  ────────────────────────── */
@@ -13,7 +13,11 @@
   --grey: #555555;
 
   --font-sans: "Inter", sans-serif;
-  --font-joker: "Permanent Marker", cursive;
+  --font-fontdiner: "Fontdiner Swanky", cursive;
+  --font-kablammo: "Kablammo", cursive;
+  --font-kings: "Kings", cursive;
+  --font-mea: "Mea Culpa", cursive;
+  --font-unifraktur: "UnifrakturMaguntia", cursive;
 }
 
 /* dark theme overrides */
@@ -37,7 +41,11 @@
   --color-grey: var(--grey);
 
   --font-sans: var(--font-sans);
-  --font-joker: var(--font-joker);
+  --font-fontdiner: var(--font-fontdiner);
+  --font-kablammo: var(--font-kablammo);
+  --font-kings: var(--font-kings);
+  --font-mea: var(--font-mea);
+  --font-unifraktur: var(--font-unifraktur);
 }
 
 /* Global element defaults */

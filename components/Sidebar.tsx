@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/AuthContext";
 import {
   Home,
@@ -16,99 +17,141 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const iconColor = {
+  home: "text-green-500",
+  users: "text-pink-500",
+  cards: "text-green-500",
+  orders: "text-purple-500",
+  sellers: "text-green-500",
+  tickets: "text-pink-500",
+  withdrawals: "text-purple-500",
+  settings: "text-pink-500",
+  account: "text-purple-500",
+  addCard: "text-green-500",
+  sales: "text-green-500",
+  buyCards: "text-green-500",
+  myOrders: "text-pink-500",
+  withdraw: "text-pink-500",
+  logout: "text-pink-500",
+};
 
 const sidebarLinks = {
   admin: [
-    { href: "/dashboard", label: "Dashboard", icon: <Home size={22} /> },
-    { href: "/dashboard/users", label: "Users", icon: <Users size={22} /> },
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: <Home size={26} className={iconColor.home} />,
+    },
+    {
+      href: "/dashboard/users",
+      label: "Users",
+      icon: <Users size={26} className={iconColor.users} />,
+    },
     {
       href: "/dashboard/cards",
       label: "Cards",
-      icon: <CreditCard size={22} />,
+      icon: <CreditCard size={26} className={iconColor.cards} />,
     },
     {
       href: "/dashboard/orders",
       label: "Orders",
-      icon: <ShoppingCart size={22} />,
+      icon: <ShoppingCart size={26} className={iconColor.orders} />,
     },
     {
       href: "/dashboard/sellers",
       label: "Sellers",
-      icon: <BarChart2 size={22} />,
+      icon: <BarChart2 size={26} className={iconColor.sellers} />,
     },
     {
       href: "/dashboard/tickets",
       label: "Tickets",
-      icon: <Ticket size={22} />,
+      icon: <Ticket size={26} className={iconColor.tickets} />,
     },
     {
       href: "/dashboard/withdrawals",
       label: "Withdrawals",
-      icon: <DollarSign size={22} />,
+      icon: <DollarSign size={26} className={iconColor.withdrawals} />,
     },
     {
       href: "/dashboard/settings",
       label: "Settings",
-      icon: <Settings size={22} />,
+      icon: <Settings size={26} className={iconColor.settings} />,
     },
   ],
   seller: [
-    { href: "/dashboard", label: "Dashboard", icon: <Home size={22} /> },
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: <Home size={26} className={iconColor.home} />,
+    },
     {
       href: "/dashboard/cards",
       label: "My Cards",
-      icon: <CreditCard size={22} />,
+      icon: <CreditCard size={26} className={iconColor.cards} />,
     },
     {
       href: "/dashboard/add-card",
       label: "Add Card",
-      icon: <Package size={22} />,
+      icon: <Package size={26} className={iconColor.addCard} />,
     },
     {
       href: "/dashboard/orders",
       label: "Sales",
-      icon: <BarChart2 size={22} />,
+      icon: <BarChart2 size={26} className={iconColor.sales} />,
     },
     {
       href: "/dashboard/withdraw",
       label: "Withdraw",
-      icon: <DollarSign size={22} />,
+      icon: <DollarSign size={26} className={iconColor.withdraw} />,
     },
-    { href: "/dashboard/account", label: "Account", icon: <User size={22} /> },
+    {
+      href: "/dashboard/account",
+      label: "Account",
+      icon: <User size={26} className={iconColor.account} />,
+    },
     {
       href: "/dashboard/tickets",
       label: "Tickets",
-      icon: <Ticket size={22} />,
+      icon: <Ticket size={26} className={iconColor.tickets} />,
     },
     {
       href: "/dashboard/settings",
       label: "Settings",
-      icon: <Settings size={22} />,
+      icon: <Settings size={26} className={iconColor.settings} />,
     },
   ],
   buyer: [
-    { href: "/dashboard", label: "Dashboard", icon: <Home size={22} /> },
     {
-      href: "/dashboard/cards",
-      label: "Buy Cards",
-      icon: <CreditCard size={22} />,
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: <Home size={26} className={iconColor.home} />,
     },
     {
       href: "/dashboard/orders",
       label: "My Orders",
-      icon: <ShoppingCart size={22} />,
+      icon: <ShoppingCart size={26} className={iconColor.myOrders} />,
     },
-    { href: "/dashboard/account", label: "Account", icon: <User size={22} /> },
+    {
+      href: "/dashboard/cards",
+      label: "Buy Cards",
+      icon: <CreditCard size={26} className={iconColor.buyCards} />,
+    },
     {
       href: "/dashboard/tickets",
       label: "Tickets",
-      icon: <Ticket size={22} />,
+      icon: <Ticket size={26} className={iconColor.tickets} />,
+    },
+    {
+      href: "/dashboard/account",
+      label: "Account",
+      icon: <User size={26} className={iconColor.account} />,
     },
     {
       href: "/dashboard/settings",
       label: "Settings",
-      icon: <Settings size={22} />,
+      icon: <Settings size={26} className={iconColor.settings} />,
     },
   ],
 };
@@ -124,10 +167,15 @@ export default function Sidebar() {
   const user = auth?.user;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [active, setActive] = useState("");
 
-  // If not logged in, redirect to login (optional for your main layout)
+  useEffect(() => {
+    if (!user) {
+      router.push("/login");
+    }
+  }, [user, router]);
+
   if (!user) {
-    if (typeof window !== "undefined") router.push("/login");
     return null;
   }
 
@@ -146,35 +194,57 @@ export default function Sidebar() {
     }
   };
 
+  // Helper for icon backgrounds (active/focused)
+  function iconBg(isActive: boolean) {
+    return isActive
+      ? "bg-[#19161a] shadow-lg"
+      : "hover:bg-[#19161a] hover:shadow-lg";
+  }
+
   return (
-    <aside className="bg-[#18141c] flex flex-col py-4 w-[80px] xl:w-[90px] transition-all duration-300 border-r border-[#231b2a] h-screen">
-      <div className="mb-8 flex flex-col items-center">
+    <aside className="bg-[#0c0b0d] flex flex-col items-center py-4 w-[74px] min-w-[74px] border-r border-[#121114] h-screen">
+      <div className="mb-6 flex flex-col items-center">
         <Link href="/dashboard">
-          <span className="text-[#38E54D] text-3xl font-bold font-mono">
-            Jk
-          </span>
+          <Image
+            src="/joker.png"
+            alt="Joker Avatar"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-full mb-2 border-2 border-[#23D160] shadow"
+            priority
+          />
         </Link>
       </div>
-      <nav className="flex flex-col gap-4 flex-1">
+      <nav className="flex flex-col gap-2 flex-1 w-full items-center">
         {links.map((item) => (
           <Link
             href={item.href}
             key={item.href}
-            className="flex flex-col items-center gap-1 text-[#b0b0b0] hover:text-[#38E54D] transition text-xs"
+            className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 ${iconBg(
+              active === item.href
+            )}`}
+            onClick={() => setActive(item.href)}
+            tabIndex={0}
           >
             {item.icon}
-            <span className="text-[10px]">{item.label}</span>
+            {/* Tooltip */}
+            <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
+              {item.label}
+            </span>
           </Link>
         ))}
       </nav>
-      <div className="flex flex-col items-center mt-8">
+      <div className="flex flex-col items-center mt-auto mb-2">
         <button
           onClick={handleLogout}
           disabled={loading}
-          className="flex flex-col items-center gap-1 text-[#EF4444] hover:text-[#fff] transition"
+          className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 hover:bg-[#19161a] hover:shadow-lg`}
         >
           {loading ? (
-            <svg className="animate-spin mb-1 h-4 w-4" viewBox="0 0 24 24">
+            <svg
+              className="animate-spin h-7 w-7 text-pink-500"
+              viewBox="0 0 24 24"
+            >
               <circle
                 className="opacity-40"
                 cx="12"
@@ -191,9 +261,12 @@ export default function Sidebar() {
               />
             </svg>
           ) : (
-            <LogOut size={22} />
+            <LogOut size={26} className={iconColor.logout} />
           )}
-          <span className="text-[10px]">Logout</span>
+          {/* Tooltip for logout */}
+          <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
+            Logout
+          </span>
         </button>
       </div>
     </aside>
