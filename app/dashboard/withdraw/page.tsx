@@ -4,11 +4,12 @@ import { useAuth } from "@/components/AuthContext";
 
 export default function WithdrawPage() {
   const auth = useAuth();
-  if (!auth?.user?.roles.includes("seller")) return <div>Unauthorized</div>;
   const [amount, setAmount] = useState("");
-  const [address, setAddress] = useState(auth.user.walletAddress || "");
+  const [address, setAddress] = useState(auth?.user?.walletAddress || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  if (!auth?.user?.roles.includes("seller")) return <div>Unauthorized</div>;
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();

@@ -85,7 +85,7 @@ export default function ResetPassword() {
         <p className="text-center text-[#abaabc] mt-8 text-sm">
           Back to{" "}
           <Link
-            href="/auth/login"
+            href="/login"
             className="text-[#76b7f7] underline hover:text-[#38E54D]"
           >
             sign in

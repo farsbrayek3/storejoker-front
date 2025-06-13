@@ -12,7 +12,7 @@ export default function Navbar() {
   const handleLogout = () => {
     if (auth) {
       auth.logout();
-      router.push("/auth/login");
+      router.push("/login");
     }
   };
 

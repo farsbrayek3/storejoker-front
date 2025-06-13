@@ -20,7 +20,8 @@ export default function TicketsPage() {
 
   let tickets = mockTickets;
   if (!roles.includes("admin")) {
-    tickets = tickets.filter((t) => true); // Replace with user filter
+    // TODO: Replace with user-specific filter when available
+    tickets = tickets.slice();
   }
 
   return (

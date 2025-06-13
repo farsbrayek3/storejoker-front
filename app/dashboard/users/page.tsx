@@ -1,60 +1,19 @@
 "use client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   ColumnDef,
 } from "@tanstack/react-table";
-import Skeleton from "react-loading-skeleton";
-import clsx from "clsx";
-import toast from "react-hot-toast";
-import dayjs from "dayjs";
-
-// Simulate API
-const fetchUsers = async () => {
-  await new Promise((r) => setTimeout(r, 800));
-  return [
-    {
-      id: 1,
-      username: "admin",
-      email: "admin@site.com",
-      roles: ["admin"],
-      status: "active",
-      registeredAt: "2024-01-01",
-      lastLogin: "2025-06-13",
-    },
-    {
-      id: 2,
-      username: "seller",
-      email: "seller@site.com",
-      roles: ["seller"],
-      status: "blocked",
-      registeredAt: "2024-03-15",
-      lastLogin: "2025-06-13",
-    },
-  ];
-};
-
-const blockUser = async (id: number) => {
-  await new Promise((r) => setTimeout(r, 600));
-  return id;
-};
-
-type User = Awaited<ReturnType<typeof fetchUsers>>[number];
-
+import { fakeDb, User } from "@/lib/fakeDatabase";
+import { useUserStore } from "@/stores/useUserStore";
 export default function UsersPage() {
-  const queryClient = useQueryClient();
-  const { data: users, isLoading } = useQuery({
+  const user = useUserStore((s) => s.user);
+
+  const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["users"],
-    queryFn: fetchUsers,
-  });
-  const blockMutation = useMutation({
-    mutationFn: blockUser,
-    onSuccess: () => {
-      toast.success("User status updated!");
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    },
+    queryFn: fakeDb.getUsers,
   });
 
   const columns: ColumnDef<User>[] = [
@@ -65,71 +24,24 @@ export default function UsersPage() {
       accessorKey: "roles",
       cell: (info) => (info.getValue() as string[]).join(", "),
     },
-    {
-      header: "Status",
-      accessorKey: "status",
-      cell: (info) => (
-        <span
-          className={clsx(
-            "font-semibold",
-            info.getValue() === "active" ? "text-green-400" : "text-red-400"
-          )}
-        >
-          {info.getValue() as string}
-        </span>
-      ),
-    },
-    {
-      header: "Registered",
-      accessorKey: "registeredAt",
-      cell: (info) => dayjs(info.getValue() as string).format("MMM D, YYYY"),
-    },
-    {
-      header: "Last Login",
-      accessorKey: "lastLogin",
-      cell: (info) => dayjs(info.getValue() as string).format("MMM D, YYYY"),
-    },
-    {
-      header: "Actions",
-      id: "actions",
-      cell: ({ row }) => (
-        <button
-          disabled={blockMutation.isPending}
-          onClick={() => blockMutation.mutate(row.original.id)}
-          className={clsx(
-            "px-2 py-1 rounded",
-            row.original.status === "blocked"
-              ? "bg-[#38E54D] text-[#18141c]"
-              : "bg-[#EF4444] text-white"
-          )}
-        >
-          {row.original.status === "blocked" ? "Unblock" : "Block"}
-        </button>
-      ),
-    },
   ];
 
   const table = useReactTable({
     data: users || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: false,
-    manualSorting: false,
   });
+
+  // Only admins can view users
+  if (!user?.roles.includes("admin")) {
+    return <div className="p-8 text-red-500">Unauthorized</div>;
+  }
 
   return (
     <div>
-      <h1 className="text-2xl mb-4 font-bold text-[#38E54D]">
-        User Management
-      </h1>
+      <h1 className="text-2xl mb-4 font-bold text-[#38E54D]">Users</h1>
       {isLoading ? (
-        <div>
-          <Skeleton height={32} width={200} />
-          <div className="mt-4 space-y-2">
-            <Skeleton height={40} />
-            <Skeleton height={40} />
-          </div>
-        </div>
+        <div>Loading users...</div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-[#222]">
           <table className="min-w-full bg-[#18141c] text-white">

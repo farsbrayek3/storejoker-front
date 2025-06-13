@@ -17,12 +17,14 @@ export default function TicketDetailPage({
   params: { id: string };
 }) {
   const auth = useAuth();
-  if (!auth?.user) return <div>Unauthorized</div>;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(mockMessages);
 
-  const handleSend = (e: any) => {
+  if (!auth?.user) return <div>Unauthorized</div>;
+
+  const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!auth.user) return;
     setMessages([
       ...messages,
       { sender: auth.user.username, message: input, time: "Now" },
