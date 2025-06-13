@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, use } from "react";
 import { useAuth } from "@/components/AuthContext";
 
 const mockMessages = [
@@ -14,8 +14,9 @@ const mockMessages = [
 export default function TicketDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const auth = useAuth();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(mockMessages);
@@ -34,9 +35,7 @@ export default function TicketDetailPage({
 
   return (
     <div>
-      <h1 className="text-2xl mb-4 font-bold text-[#38E54D]">
-        Ticket #{params.id}
-      </h1>
+      <h1 className="text-2xl mb-4 font-bold text-[#38E54D]">Ticket #{id}</h1>
       <div className="bg-[#18141c] rounded-lg p-4 mb-4">
         {messages.map((m, i) => (
           <div key={i} className="mb-3">
