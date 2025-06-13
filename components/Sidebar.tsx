@@ -14,6 +14,9 @@ import {
   LogOut,
   Package,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 const sidebarLinks = {
   admin: [
@@ -119,7 +122,29 @@ function getSidebarLinks(roles: string[]) {
 export default function Sidebar() {
   const auth = useAuth();
   const user = auth?.user;
-  const links = getSidebarLinks(user?.roles ?? []);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  // If not logged in, redirect to login (optional for your main layout)
+  if (!user) {
+    if (typeof window !== "undefined") router.push("/login");
+    return null;
+  }
+
+  const links = getSidebarLinks(user.roles ?? []);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await auth?.logout();
+      toast.success("Logged out!");
+      router.push("/login");
+    } catch {
+      toast.error("Logout failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <aside className="bg-[#18141c] flex flex-col py-4 w-[80px] xl:w-[90px] transition-all duration-300 border-r border-[#231b2a] h-screen">
@@ -144,10 +169,30 @@ export default function Sidebar() {
       </nav>
       <div className="flex flex-col items-center mt-8">
         <button
-          onClick={() => auth?.logout()}
+          onClick={handleLogout}
+          disabled={loading}
           className="flex flex-col items-center gap-1 text-[#EF4444] hover:text-[#fff] transition"
         >
-          <LogOut size={22} />
+          {loading ? (
+            <svg className="animate-spin mb-1 h-4 w-4" viewBox="0 0 24 24">
+              <circle
+                className="opacity-40"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-80"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+          ) : (
+            <LogOut size={22} />
+          )}
           <span className="text-[10px]">Logout</span>
         </button>
       </div>

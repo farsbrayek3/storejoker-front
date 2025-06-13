@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { useAuth } from "@/components/AuthContext";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type LoginForm = {
   email: string;
@@ -19,29 +20,45 @@ const quickUsers = [
 export default function Login() {
   const { register, handleSubmit, setValue } = useForm<LoginForm>();
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const auth = useAuth();
   const router = useRouter();
 
-  const onSubmit = ({ email, password }: LoginForm) => {
-    if (!auth) return;
-    const user = auth.login(email, password);
-    if (user) {
-      router.push("/dashboard");
-    } else {
-      setError("Invalid credentials. Try a quick login below.");
+  const onSubmit = async ({ email, password }: LoginForm) => {
+    setLoading(true);
+    try {
+      if (!auth) return;
+      const user = await auth.login(email, password);
+      if (user) {
+        toast.success(`Welcome ${user.username}!`);
+        router.push("/dashboard");
+      } else {
+        toast.error("Invalid credentials. Try a quick login below.");
+      }
+    } catch {
+      toast.error("Unexpected error during login.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleQuickLogin = (email: string, password: string) => {
+  const handleQuickLogin = async (email: string, password: string) => {
     setValue("email", email);
     setValue("password", password);
-    if (!auth) return;
-    const user = auth.login(email, password);
-    if (user) {
-      router.push("/dashboard");
-    } else {
-      setError("Quick login failed.");
+    setLoading(true);
+    try {
+      if (!auth) return;
+      const user = await auth.login(email, password);
+      if (user) {
+        toast.success(`Welcome ${user.username}!`);
+        router.push("/dashboard");
+      } else {
+        toast.error("Quick login failed.");
+      }
+    } catch {
+      toast.error("Unexpected error during login.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +96,7 @@ export default function Login() {
               className="w-full rounded-md bg-[#161616] border border-[#3D3D3D] focus:border-[#38E54D] focus:ring-0 text-white px-3 py-2 placeholder:text-[#8e8e8e] text-base outline-none transition"
               placeholder="Email address"
               autoComplete="email"
+              disabled={loading}
             />
           </div>
           <div className="relative">
@@ -91,6 +109,7 @@ export default function Login() {
               className="w-full rounded-md bg-[#161616] border border-[#3D3D3D] focus:border-[#38E54D] focus:ring-0 text-white px-3 py-2 placeholder:text-[#8e8e8e] text-base outline-none transition"
               placeholder="Password"
               autoComplete="current-password"
+              disabled={loading}
             />
             <button
               type="button"
@@ -104,11 +123,33 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            className="w-full py-2 rounded-md bg-[#38E54D] hover:bg-[#28a745] font-semibold text-[#18141c] text-lg transition"
+            disabled={loading}
+            className="w-full py-2 rounded-md bg-[#38E54D] hover:bg-[#28a745] font-semibold text-[#18141c] text-lg transition flex items-center justify-center"
           >
+            {loading ? (
+              <svg
+                className="animate-spin mr-2 h-5 w-5 text-[#18141c]"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-40"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-80"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+            ) : null}
             Sign In
           </button>
-          {error && <p className="text-center text-red-500 text-sm">{error}</p>}
         </form>
         <div className="mt-6">
           <div className="flex justify-between mb-2">
@@ -118,6 +159,7 @@ export default function Login() {
                 onClick={() => handleQuickLogin(user.email, user.password)}
                 className="px-3 py-1 rounded bg-[#25282f] text-xs text-white hover:bg-[#38E54D] hover:text-[#18141c] transition"
                 type="button"
+                disabled={loading}
               >
                 {user.label}
               </button>

@@ -5,8 +5,33 @@ export type User = {
   id: string;
   username: string;
   email: string;
+  password: string; // Add this line for demo only!
   roles: UserRole[];
 };
+
+const users: User[] = [
+  {
+    id: "1",
+    username: "admin",
+    email: "admin@site.com",
+    password: "test123",
+    roles: ["admin"],
+  },
+  {
+    id: "2",
+    username: "seller",
+    email: "seller@site.com",
+    password: "test123",
+    roles: ["seller"],
+  },
+  {
+    id: "3",
+    username: "buyer",
+    email: "buyer@site.com",
+    password: "test123",
+    roles: ["buyer"],
+  },
+];
 
 export type Card = {
   id: string;
@@ -27,12 +52,6 @@ export type Order = {
   status: "completed" | "pending" | "cancelled";
   date: string;
 };
-
-const users: User[] = [
-  { id: "1", username: "admin", email: "admin@site.com", roles: ["admin"] },
-  { id: "2", username: "seller", email: "seller@site.com", roles: ["seller"] },
-  { id: "3", username: "buyer", email: "buyer@site.com", roles: ["buyer"] },
-];
 
 const cards: Card[] = [
   {

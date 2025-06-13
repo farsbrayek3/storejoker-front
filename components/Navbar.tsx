@@ -4,15 +4,26 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Image from "next/image";
 import { useAuth } from "@/components/AuthContext";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const auth = useAuth();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (auth) {
-      auth.logout();
-      router.push("/login");
+      setLoading(true);
+      try {
+        await auth.logout?.();
+        toast.success("Logged out successfully!");
+        router.push("/login");
+      } catch {
+        toast.error("Error during logout.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -34,20 +45,53 @@ export default function Navbar() {
         <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#EF4444]" />
         <span className="sr-only">Notifications</span>
       </button>
-      <Image
-        src="/avatar.jpg"
-        alt="Profile"
-        width={32}
-        height={32}
-        className="rounded-full border-2 border-[#251f2c] h-8 w-8 object-cover"
-        priority
-      />
-      {auth?.user && (
+      {auth?.user ? (
+        <>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/avatar.jpg"
+              alt="Profile"
+              width={32}
+              height={32}
+              className="rounded-full border-2 border-[#251f2c] h-8 w-8 object-cover"
+              priority
+            />
+            <span className="text-white text-sm font-bold">
+              {auth.user.username}
+            </span>
+          </div>
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className="ml-2 px-3 py-1 rounded text-[#EF4444] font-semibold bg-[#231b2a] hover:bg-[#2f232a] transition flex items-center"
+          >
+            {loading && (
+              <svg className="animate-spin mr-1 h-4 w-4" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-40"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-80"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+            Logout
+          </button>
+        </>
+      ) : (
         <button
-          onClick={handleLogout}
-          className="ml-2 px-3 py-1 rounded text-[#EF4444] font-semibold bg-[#231b2a] hover:bg-[#2f232a] transition"
+          onClick={() => router.push("/login")}
+          className="ml-2 px-3 py-1 rounded text-[#38E54D] font-semibold bg-[#231b2a] hover:bg-[#2f232a] transition"
         >
-          Logout
+          Login
         </button>
       )}
     </header>
