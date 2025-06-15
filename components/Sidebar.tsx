@@ -15,9 +15,12 @@ import {
   LogOut,
   Package,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
+
+// Loader from your login/signup (make sure the import path is correct)
+import Loader from "@/components/Loader"; // <-- Adjust import if needed
 
 const iconColor = {
   home: "text-green-500",
@@ -171,6 +174,7 @@ export default function Sidebar() {
   const auth = useAuth();
   const user = auth?.user;
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState("");
 
@@ -180,11 +184,26 @@ export default function Sidebar() {
     }
   }, [user, router]);
 
+  useEffect(() => {
+    setActive(pathname);
+  }, [pathname]);
+
+  const [navLoading, setNavLoading] = useState(false);
+
   if (!user) {
     return null;
   }
 
   const links = getSidebarLinks(user.roles ?? []);
+
+  // Loader overlay logic for navigation between sidebar pages
+  const handleSidebarNav = (href: string) => () => {
+    if (pathname === href) return; // already on page
+    setNavLoading(true);
+    router.push(href);
+    // Nav loading will be reset by layout remount on route change, but for SSR fallback:
+    setTimeout(() => setNavLoading(false), 1200);
+  };
 
   const handleLogout = async () => {
     setLoading(true);
@@ -207,73 +226,82 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="bg-[#0c0b0d] flex flex-col items-center py-4 w-[74px] min-w-[74px] border-r border-[#121114] h-screen">
-      <div className="mb-6 flex flex-col items-center">
-        <Link href="/dashboard">
-          <Image
-            src="/joker.png"
-            alt="Joker Avatar"
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full mb-2 border-2 border-[#23D160] shadow"
-            priority
-          />
-        </Link>
-      </div>
-      <nav className="flex flex-col gap-2 flex-1 w-full items-center">
-        {links.map((item) => (
-          <Link
-            href={item.href}
-            key={item.href}
-            className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 ${iconBg(
-              active === item.href
-            )}`}
-            onClick={() => setActive(item.href)}
-            tabIndex={0}
-          >
-            {item.icon}
-            {/* Tooltip */}
-            <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
-              {item.label}
-            </span>
+    <>
+      {/* Loader overlay for sidebar navigation */}
+      {navLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+          <Loader />
+        </div>
+      )}
+      <aside className="bg-[#0c0b0d] flex flex-col items-center py-4 w-[74px] min-w-[74px] border-r border-[#121114] h-screen">
+        <div className="mb-6 flex flex-col items-center">
+          <Link href="/dashboard">
+            <Image
+              src="/joker.png"
+              alt="Joker Avatar"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-full mb-2 border-2 border-[#23D160] shadow"
+              priority
+            />
           </Link>
-        ))}
-      </nav>
-      <div className="flex flex-col items-center mt-auto mb-2">
-        <button
-          onClick={handleLogout}
-          disabled={loading}
-          className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 hover:bg-[#19161a] hover:shadow-lg`}
-        >
-          {loading ? (
-            <svg
-              className="animate-spin h-7 w-7 text-pink-500"
-              viewBox="0 0 24 24"
+        </div>
+        <nav className="flex flex-col gap-2 flex-1 w-full items-center">
+          {links.map((item) => (
+            <button
+              key={item.href}
+              className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 ${iconBg(
+                active === item.href
+              )}`}
+              onClick={handleSidebarNav(item.href)}
+              tabIndex={0}
+              aria-label={item.label}
+              type="button"
             >
-              <circle
-                className="opacity-40"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-80"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              />
-            </svg>
-          ) : (
-            <LogOut size={26} className={iconColor.logout} />
-          )}
-          {/* Tooltip for logout */}
-          <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
-            Logout
-          </span>
-        </button>
-      </div>
-    </aside>
+              {item.icon}
+              {/* Tooltip */}
+              <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
+                {item.label}
+              </span>
+            </button>
+          ))}
+        </nav>
+        <div className="flex flex-col items-center mt-auto mb-2">
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition duration-150 my-1 hover:bg-[#19161a] hover:shadow-lg`}
+          >
+            {loading ? (
+              <svg
+                className="animate-spin h-7 w-7 text-pink-500"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-40"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-80"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            ) : (
+              <LogOut size={26} className={iconColor.logout} />
+            )}
+            {/* Tooltip for logout */}
+            <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
+              Logout
+            </span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
