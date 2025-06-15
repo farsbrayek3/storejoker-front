@@ -129,24 +129,29 @@ const sidebarLinks = {
       icon: <Home size={26} className={iconColor.home} />,
     },
     {
-      href: "/dashboard/orders",
-      label: "My Orders",
-      icon: <ShoppingCart size={26} className={iconColor.myOrders} />,
-    },
-    {
       href: "/dashboard/cards",
       label: "Buy Cards",
       icon: <CreditCard size={26} className={iconColor.buyCards} />,
     },
     {
-      href: "/dashboard/tickets",
-      label: "Tickets",
-      icon: <Ticket size={26} className={iconColor.tickets} />,
+      href: "/dashboard/deposit",
+      label: "Deposit",
+      icon: <DollarSign size={26} className="text-green-500" />,
+    }, // <-- NEW
+    {
+      href: "/dashboard/orders",
+      label: "My Orders",
+      icon: <ShoppingCart size={26} className={iconColor.myOrders} />,
     },
     {
       href: "/dashboard/account",
       label: "Account",
       icon: <User size={26} className={iconColor.account} />,
+    },
+    {
+      href: "/dashboard/tickets",
+      label: "Tickets",
+      icon: <Ticket size={26} className={iconColor.tickets} />,
     },
     {
       href: "/dashboard/settings",

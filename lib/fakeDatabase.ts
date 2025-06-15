@@ -33,11 +33,12 @@ const users: User[] = [
   },
 ];
 
-export type Card = {
+export type CardData = {
   id: string;
   sellerId: string;
   cardNumber: string;
   expiration: string;
+  cardType: "Visa" | "Mastercard" | "Amex" | "Discover";
   cvv: string;
   price: number;
   status: "active" | "sold" | "blocked";
@@ -53,7 +54,7 @@ export type Order = {
   date: string;
 };
 
-const cards: Card[] = [
+const cards: CardData[] = [
   {
     id: "c1",
     sellerId: "2",
@@ -62,6 +63,7 @@ const cards: Card[] = [
     cvv: "123",
     price: 100,
     status: "active",
+    cardType: "Visa",
   },
   {
     id: "c2",
@@ -71,6 +73,7 @@ const cards: Card[] = [
     cvv: "321",
     price: 80,
     status: "sold",
+    cardType: "Mastercard",
   },
 ];
 
@@ -99,11 +102,11 @@ export const fakeDb = {
   getCards: async () => [...cards],
   getCardsBySeller: async (sellerId: string) =>
     cards.filter((c) => c.sellerId === sellerId),
-  addCard: async (card: Card) => {
+  addCard: async (card: CardData) => {
     cards.push(card);
     return card;
   },
-  updateCardStatus: async (id: string, status: Card["status"]) => {
+  updateCardStatus: async (id: string, status: CardData["status"]) => {
     const card = cards.find((c) => c.id === id);
     if (card) card.status = status;
     return card;
