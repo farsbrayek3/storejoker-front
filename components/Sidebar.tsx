@@ -18,9 +18,8 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
-
-// Loader from your login/signup (make sure the import path is correct)
-import Loader from "@/components/Loader"; // <-- Adjust import if needed
+import Loader from "@/components/Loader";
+import ThemeToggle from "@/components/ThemeToggle"; // <-- Import theme toggle
 
 const iconColor = {
   home: "text-green-500",
@@ -201,7 +200,6 @@ export default function Sidebar() {
     if (pathname === href) return; // already on page
     setNavLoading(true);
     router.push(href);
-    // Nav loading will be reset by layout remount on route change, but for SSR fallback:
     setTimeout(() => setNavLoading(false), 1200);
   };
 
@@ -218,7 +216,6 @@ export default function Sidebar() {
     }
   };
 
-  // Helper for icon backgrounds (active/focused)
   function iconBg(isActive: boolean) {
     return isActive
       ? "bg-[#19161a] shadow-lg"
@@ -227,7 +224,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Loader overlay for sidebar navigation */}
       {navLoading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
           <Loader />
@@ -259,14 +255,17 @@ export default function Sidebar() {
               type="button"
             >
               {item.icon}
-              {/* Tooltip */}
               <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
                 {item.label}
               </span>
             </button>
           ))}
         </nav>
-        <div className="flex flex-col items-center mt-auto mb-2">
+        {/* Theme Toggle Button */}
+        <div className="mt-4 mb-2">
+          <ThemeToggle />
+        </div>
+        <div className="flex flex-col items-center mb-2">
           <button
             onClick={handleLogout}
             disabled={loading}
@@ -295,7 +294,6 @@ export default function Sidebar() {
             ) : (
               <LogOut size={26} className={iconColor.logout} />
             )}
-            {/* Tooltip for logout */}
             <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap rounded-md bg-[#19161a] px-3 py-1 text-xs text-white z-50 shadow-lg border border-[#231b2a]">
               Logout
             </span>
